@@ -1,0 +1,33 @@
+﻿.header {
+  height: 60px;
+  background-color: #1f2937;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.logo {
+  font-weight: bold;
+}
+
+.system-name {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logout-btn {
+  background-color: #ef4444;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+}

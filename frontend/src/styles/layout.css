@@ -1,0 +1,19 @@
+﻿.layout {
+  display: flex;
+  min-height: calc(100vh - 120px);
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  background-color: #ffffff;
+}
+
+/* footer */
+.footer {
+  height: 60px;
+  background-color: #e5e7eb;
+  text-align: center;
+  padding: 10px;
+  font-size: 13px;
+}
