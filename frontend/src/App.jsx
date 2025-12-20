@@ -14,13 +14,15 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import StudentDashboard from "./components/cards/StudentDashboard";
-import TeacherDashboard from "./components/cards/TeacherDashboard";
+import TeacherDashboard from "./components/teacher/TeacherDashboard";
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [studentCourses, setStudentCourses] = useState([]);
 const [selectedCourseId, setSelectedCourseId] = useState(null);
+const [teacherCourses, setTeacherCourses] = useState([]);
+
 
 
   const loadUser = () => {
@@ -43,18 +45,21 @@ const [selectedCourseId, setSelectedCourseId] = useState(null);
       .catch(() => setLoading(false));
   };
 
-  useEffect(() => {
-    loadUser();
-  }, []);
+// 1️⃣ Cargar usuario
+useEffect(() => {
+  loadUser();
+}, []);
 
-  useEffect(() => {
+
+// 2️⃣ Cargar cursos del ESTUDIANTE
+useEffect(() => {
   if (!user || user.role !== "STUDENT") {
     setStudentCourses([]);
-    setSelectedCourseId(null);
     return;
   }
 
   const token = localStorage.getItem("token");
+
   fetch("http://localhost:4000/courses/my", {
     headers: { Authorization: `Bearer ${token}` }
   })
@@ -62,6 +67,27 @@ const [selectedCourseId, setSelectedCourseId] = useState(null);
     .then(setStudentCourses)
     .catch(() => setStudentCourses([]));
 }, [user]);
+
+
+// 3️⃣ Cargar cursos del PROFESOR
+useEffect(() => {
+  if (!user || user.role !== "TEACHER") {
+    setTeacherCourses([]);
+    return;
+  }
+
+  const token = localStorage.getItem("token");
+
+  fetch("http://localhost:4000/courses/teacher", {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+    .then(res => res.json())
+    .then(setTeacherCourses)
+    .catch(() => setTeacherCourses([]));
+    console.log("Teacher courses:", teacherCourses);
+
+}, [user]);
+
 
 
   const logout = () => {
@@ -81,13 +107,18 @@ const [selectedCourseId, setSelectedCourseId] = useState(null);
       />
 
       <div className="layout">
-        {user && (
-          <Sidebar
-            role={user.role}
-            courses={user.role === "STUDENT" ? studentCourses : []}
-            onSelectCourse={setSelectedCourseId}
-          />
-        )}
+    {user && (
+      <Sidebar
+        role={user.role}
+        courses={
+          user.role === "STUDENT"
+            ? studentCourses
+            : teacherCourses
+        }
+        onSelectCourse={setSelectedCourseId}
+      />
+    )}
+
 
 
         <main className="content">
@@ -128,7 +159,10 @@ const [selectedCourseId, setSelectedCourseId] = useState(null);
                       setSelectedCourseId={setSelectedCourseId}
                     />
                   ) : (
-                    <TeacherDashboard />
+                    <TeacherDashboard
+    selectedCourseId={selectedCourseId}
+    setSelectedCourseId={setSelectedCourseId}
+  />
                   )}
                 </ProtectedRoute>
               }

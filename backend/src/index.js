@@ -9,6 +9,7 @@ import userRoutes from "./routes/userRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import courseRoutes from "./routes/courseRoutes.js";
 import assignmentRoutes from "./routes/assignmentRoutes.js";
+import topicRoutes from "./routes/topicRoutes.js";
 const app = express();
 
 // Seguridad básica
@@ -30,6 +31,8 @@ app.use("/dashboard", dashboardRoutes);
 app.use("/courses", courseRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/assignments", assignmentRoutes);
+app.use("/topics", topicRoutes);
+app.use("/uploads", express.static("uploads"));
 
 
 
