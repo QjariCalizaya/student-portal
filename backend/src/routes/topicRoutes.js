@@ -7,6 +7,8 @@ import {
   addResourceToTopic,
   uploadMaterial
 } from "../controllers/topicsController.js";
+import { deleteResource, deleteTopic } from "../controllers/topicsController.js";
+
 
 const router = express.Router();
 
@@ -19,5 +21,19 @@ router.post(
   uploadMaterial.single("file"),
   addResourceToTopic
 );
+router.delete(
+  "/resources/:resourceId",
+  authenticate,
+  authorize("TEACHER"),
+  deleteResource
+);
+
+router.delete(
+  "/:topicId",
+  authenticate,
+  authorize("TEACHER"),
+  deleteTopic
+);
+
 
 export default router;

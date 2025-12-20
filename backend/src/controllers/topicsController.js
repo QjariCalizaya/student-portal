@@ -1,4 +1,14 @@
 ﻿import pool from "../config/db.js";
+import fs from "fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const MATERIALS_DIR = path.join(__dirname, "../../uploads/materials");
+
+
 
 export const createTopic = async (req, res) => {
   try {
@@ -95,5 +105,95 @@ export const addResourceToTopic = async (req, res) => {
   } catch (err) {
     console.error("Upload resource error:", err);
     res.status(500).json({ error: "Failed to upload file" });
+  }
+};
+
+export const deleteResource = async (req, res) => {
+  const { resourceId } = req.params;
+  const teacherId = req.user.id;
+
+  try {
+    const result = await pool.query(
+      `
+      SELECT tr.file_url
+      FROM topic_resources tr
+      JOIN course_topics ct ON ct.id = tr.topic_id
+      JOIN course_groups cg ON cg.id = ct.course_group_id
+      WHERE tr.id = $1 AND cg.teacher_id = $2
+      `,
+      [resourceId, teacherId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Recurso no encontrado o sin permisos" });
+    }
+
+    const fileUrl = result.rows[0].file_url;
+    const filename = path.basename(fileUrl);
+    const filePath = path.join(MATERIALS_DIR, filename);
+
+    await pool.query("DELETE FROM topic_resources WHERE id = $1", [resourceId]);
+
+    try {
+      await fs.unlink(filePath);
+    } catch {
+      // si el archivo no existe, no rompemos nada
+    }
+
+    res.json({ message: "Archivo eliminado correctamente" });
+  } catch (err) {
+    console.error("Delete resource error:", err);
+    res.status(500).json({ error: "Failed to delete resource" });
+  }
+};
+
+export const deleteTopic = async (req, res) => {
+  const { topicId } = req.params;
+  const teacherId = req.user.id;
+
+  try {
+    // traer archivos del tema
+    const files = await pool.query(
+      `
+      SELECT tr.file_url
+      FROM topic_resources tr
+      JOIN course_topics ct ON ct.id = tr.topic_id
+      JOIN course_groups cg ON cg.id = ct.course_group_id
+      WHERE ct.id = $1 AND cg.teacher_id = $2
+      `,
+      [topicId, teacherId]
+    );
+
+    // validar ownership del tema
+    const check = await pool.query(
+      `
+      SELECT 1
+      FROM course_topics ct
+      JOIN course_groups cg ON cg.id = ct.course_group_id
+      WHERE ct.id = $1 AND cg.teacher_id = $2
+      `,
+      [topicId, teacherId]
+    );
+
+    if (check.rowCount === 0) {
+      return res.status(404).json({ error: "Tema no encontrado o sin permisos" });
+    }
+
+    // borrar tema (DB)
+    await pool.query("DELETE FROM course_topics WHERE id = $1", [topicId]);
+
+    // borrar archivos físicos
+    for (const row of files.rows) {
+      const filename = path.basename(row.file_url);
+      const filePath = path.join(MATERIALS_DIR, filename);
+      try {
+        await fs.unlink(filePath);
+      } catch {}
+    }
+
+    res.json({ message: "Tema eliminado correctamente" });
+  } catch (err) {
+    console.error("Delete topic error:", err);
+    res.status(500).json({ error: "Failed to delete topic" });
   }
 };
