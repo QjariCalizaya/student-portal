@@ -17,3 +17,16 @@
   padding: 10px;
   font-size: 13px;
 }
+
+input[type="file"] {
+  margin: 10px 0;
+}
+
+button {
+  margin-top: 8px;
+}
+
+.error-message {
+  color: #dc2626;
+  margin-top: 8px;
+}

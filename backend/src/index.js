@@ -6,7 +6,9 @@ import authRoutes from "./routes/authRoutes.js";
 import { authenticate } from "./middlewares/authMiddleware.js";
 import { authorize } from "./middlewares/roleMiddleware.js";
 import userRoutes from "./routes/userRoutes.js";
-
+import dashboardRoutes from "./routes/dashboardRoutes.js";
+import courseRoutes from "./routes/courseRoutes.js";
+import assignmentRoutes from "./routes/assignmentRoutes.js";
 const app = express();
 
 // Seguridad básica
@@ -24,6 +26,12 @@ app.use(cors({
 app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
+app.use("/dashboard", dashboardRoutes);
+app.use("/courses", courseRoutes);
+app.use("/uploads", express.static("uploads"));
+app.use("/assignments", assignmentRoutes);
+
+
 
 // Test endpoint
 app.get("/", (req, res) => {

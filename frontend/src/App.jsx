@@ -19,6 +19,9 @@ import TeacherDashboard from "./components/cards/TeacherDashboard";
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [studentCourses, setStudentCourses] = useState([]);
+const [selectedCourseId, setSelectedCourseId] = useState(null);
+
 
   const loadUser = () => {
     const token = localStorage.getItem("token");
@@ -44,6 +47,23 @@ function App() {
     loadUser();
   }, []);
 
+  useEffect(() => {
+  if (!user || user.role !== "STUDENT") {
+    setStudentCourses([]);
+    setSelectedCourseId(null);
+    return;
+  }
+
+  const token = localStorage.getItem("token");
+  fetch("http://localhost:4000/courses/my", {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+    .then(res => res.json())
+    .then(setStudentCourses)
+    .catch(() => setStudentCourses([]));
+}, [user]);
+
+
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
@@ -61,7 +81,14 @@ function App() {
       />
 
       <div className="layout">
-        {user && <Sidebar role={user.role} />}
+        {user && (
+          <Sidebar
+            role={user.role}
+            courses={user.role === "STUDENT" ? studentCourses : []}
+            onSelectCourse={setSelectedCourseId}
+          />
+        )}
+
 
         <main className="content">
           <Routes>
@@ -95,13 +122,18 @@ function App() {
               path="/dashboard"
               element={
                 <ProtectedRoute user={user}>
-                  {user?.role === "STUDENT"
-                    ? <StudentDashboard />
-                    : <TeacherDashboard />
-                  }
+                  {user?.role === "STUDENT" ? (
+                    <StudentDashboard
+                      selectedCourseId={selectedCourseId}
+                      setSelectedCourseId={setSelectedCourseId}
+                    />
+                  ) : (
+                    <TeacherDashboard />
+                  )}
                 </ProtectedRoute>
               }
             />
+
 
             {/* FALLBACK */}
             <Route path="*" element={<Navigate to="/" />} />
