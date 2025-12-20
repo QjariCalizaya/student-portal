@@ -89,12 +89,12 @@ function StudentDashboard({ selectedCourseId, setSelectedCourseId }) {
   if (!selectedCourseId) {
     return (
       <>
-        <h1>Dashboard</h1>
-        <p>Bienvenido al portal estudiantil.</p>
+        <h1>Панель управления</h1>
+        <p>Добро пожаловать в студенческий портал.</p>
 
         <div className="cards">
           {courses.length === 0 && (
-            <p>No estás inscrito en ningún curso.</p>
+            <p>Вы не записаны ни на один курс.</p>
           )}
 
           {courses.map(course => (
@@ -105,9 +105,9 @@ function StudentDashboard({ selectedCourseId, setSelectedCourseId }) {
               style={{ cursor: "pointer" }}
             >
               <h2>{course.title}</h2>
-              <p>Profesor: {course.teacher}</p>
+              <p>Преподаватель: {course.teacher}</p>
               <p className="highlight-blue">
-                Click para ver el curso
+                Нажмите, чтобы открыть курс
               </p>
             </div>
           ))}
@@ -121,35 +121,37 @@ function StudentDashboard({ selectedCourseId, setSelectedCourseId }) {
   // ==========================
   return (
     <>
-      <button onClick={() => setSelectedCourseId(null)}>← Volver</button>
+      <button onClick={() => setSelectedCourseId(null)}>
+        ← Назад
+      </button>
 
       {!summary ? (
-        <p>Cargando curso...</p>
+        <p>Загрузка курса...</p>
       ) : (
         <>
           <h1>{summary.title}</h1>
-          <p>Promedio: {summary.average}</p>
-          <p>Tareas pendientes: {summary.pending_assignments}</p>
+          <p>Средний балл: {summary.average}</p>
+          <p>Невыполненные задания: {summary.pending_assignments}</p>
 
           {/* ==========================
               TAREAS
           ========================== */}
-          <h2>Tareas</h2>
+          <h2>Задания</h2>
 
           {assignments.length === 0 && (
-            <p>No hay tareas asignadas.</p>
+            <p>Задания отсутствуют.</p>
           )}
 
           {assignments.map(a => (
             <div key={a.id} className="card">
               <h3>{a.title}</h3>
               <p>
-                Entrega:{" "}
+                Срок сдачи:{" "}
                 {new Date(a.due_at).toLocaleDateString()}
               </p>
 
               {a.submission_status === "REVIEWED" && (
-                <p className="highlight-green">Calificada</p>
+                <p className="highlight-green">Проверено</p>
               )}
 
               {a.submission_status !== "REVIEWED" && (
@@ -175,10 +177,10 @@ function StudentDashboard({ selectedCourseId, setSelectedCourseId }) {
           {/* ==========================
               MATERIALES
           ========================== */}
-          <h2>Materiales</h2>
+          <h2>Материалы</h2>
 
           {topics.length === 0 && (
-            <p>No hay materiales publicados.</p>
+            <p>Материалы не опубликованы.</p>
           )}
 
           {topics.map(t => (
@@ -186,7 +188,7 @@ function StudentDashboard({ selectedCourseId, setSelectedCourseId }) {
               <h3>{t.topic_title}</h3>
 
               {t.resources.length === 0 ? (
-                <p>(Sin archivos)</p>
+                <p>(Файлы отсутствуют)</p>
               ) : (
                 <ul>
                   {t.resources.map(r => (

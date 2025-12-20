@@ -5,7 +5,7 @@ function AddTopicButton({ courseGroupId, onSuccess }) {
   const token = localStorage.getItem("token");
 
   const createTopic = async () => {
-    const title = prompt("Título del tema:");
+    const title = prompt("Название темы:");
     if (!title) return;
 
     setLoading(true);
@@ -29,7 +29,7 @@ function AddTopicButton({ courseGroupId, onSuccess }) {
   return (
     <div style={{ marginTop: "20px" }}>
       <button onClick={createTopic} disabled={loading}>
-        + Agregar tema
+        + Добавить тему
       </button>
     </div>
   );

@@ -1,6 +1,14 @@
 ﻿import { useEffect, useState } from "react";
 
-const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+const days = [
+  "Понедельник",
+  "Вторник",
+  "Среда",
+  "Четверг",
+  "Пятница",
+  "Суббота",
+  "Воскресенье"
+];
 
 function ScheduleCalendar() {
   const [schedule, setSchedule] = useState([]);
@@ -20,13 +28,13 @@ function ScheduleCalendar() {
 
   return (
     <div className="card">
-      <h2>Horario semanal</h2>
+      <h2>Еженедельное расписание</h2>
 
       <table style={{ width: "100%", borderCollapse: "collapse" }}>
         <thead>
           <tr>
-            <th>Día</th>
-            <th>Clases</th>
+            <th>День</th>
+            <th>Занятия</th>
           </tr>
         </thead>
         <tbody>

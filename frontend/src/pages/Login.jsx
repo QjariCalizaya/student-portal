@@ -20,38 +20,38 @@ function Login({ onLoginSuccess }) {
       });
 
       if (!res.ok) {
-        setError("Credenciales incorrectas");
+        setError("Неверный адрес электронной почты или пароль");
         return;
       }
 
       const data = await res.json();
 
-      // Guardar token
+      // Сохранить токен
       localStorage.setItem("token", data.token);
 
-      // Notificar a App.jsx
+      // Уведомить App.jsx
       onLoginSuccess();
 
     } catch (err) {
-      setError("Error de conexión con el servidor");
+      setError("Ошибка подключения к серверу");
     }
   };
 
   return (
     <div className="login-container">
-      <h1>Iniciar sesión</h1>
+      <h1>Вход в систему</h1>
 
       <form className="login-form" onSubmit={handleSubmit}>
-        <label>Correo electrónico</label>
+        <label>Электронная почта</label>
         <input
           type="email"
-          placeholder="usuario@correo.com"
+          placeholder="user@email.com"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        <label>Contraseña</label>
+        <label>Пароль</label>
         <input
           type="password"
           placeholder="••••••••••"
@@ -60,10 +60,10 @@ function Login({ onLoginSuccess }) {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button type="submit">Entrar</button>
+        <button type="submit">Войти</button>
 
         <p className="register-link">
-          ¿No tienes cuenta? <a href="#">Regístrate</a>
+          Нет аккаунта? <a href="#">Зарегистрироваться</a>
         </p>
 
         {error && (

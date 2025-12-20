@@ -5,10 +5,10 @@ function AddAssignmentButton({ courseGroupId, onSuccess }) {
   const token = localStorage.getItem("token");
 
   const createAssignment = async () => {
-    const title = prompt("Título de la tarea:");
+    const title = prompt("Название задания:");
     if (!title) return;
 
-    const due_at = prompt("Fecha límite (YYYY-MM-DD):");
+    const due_at = prompt("Срок сдачи (YYYY-MM-DD):");
     if (!due_at) return;
 
     setLoading(true);
@@ -28,7 +28,7 @@ function AddAssignmentButton({ courseGroupId, onSuccess }) {
       });
 
       if (!res.ok) {
-        throw new Error("Error al crear la tarea");
+        throw new Error("Ошибка при создании задания");
       }
 
       onSuccess?.();
@@ -41,7 +41,7 @@ function AddAssignmentButton({ courseGroupId, onSuccess }) {
 
   return (
     <button onClick={createAssignment} disabled={loading}>
-      {loading ? "Creando..." : "+ Agregar tarea"}
+      {loading ? "Создание..." : "+ Добавить задание"}
     </button>
   );
 }

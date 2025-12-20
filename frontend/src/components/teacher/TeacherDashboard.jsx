@@ -8,7 +8,7 @@ function TeacherDashboard({ selectedCourseId, setSelectedCourseId }) {
   const token = localStorage.getItem("token");
 
   // ==========================
-  // ENTREGAS PENDIENTES
+  // НЕПРОВЕРЕННЫЕ РАБОТЫ
   // ==========================
   useEffect(() => {
     fetch("http://localhost:4000/courses/teacher", {
@@ -45,7 +45,7 @@ function TeacherDashboard({ selectedCourseId, setSelectedCourseId }) {
   }, [token]);
 
   // ==========================
-  // HORARIO DE HOY
+  // РАСПИСАНИЕ НА СЕГОДНЯ
   // ==========================
   useEffect(() => {
     fetch("http://localhost:4000/dashboard/teacher/schedule/today", {
@@ -57,20 +57,20 @@ function TeacherDashboard({ selectedCourseId, setSelectedCourseId }) {
   }, [token]);
 
   // ==========================
-  // DASHBOARD GENERAL
+  // ОБЩАЯ ПАНЕЛЬ
   // ==========================
   if (!selectedCourseId) {
     return (
       <>
-        <h1>Dashboard del profesor</h1>
+        <h1>Панель преподавателя</h1>
 
         <div className="cards">
-          {/* ENTREGAS */}
+          {/* НЕПРОВЕРЕННЫЕ РАБОТЫ */}
           <div className="card">
-            <h2>Entregas pendientes</h2>
+            <h2>Работы на проверке</h2>
 
             {pendingSubmissions.length === 0 ? (
-              <p>No hay entregas pendientes.</p>
+              <p>Нет работ, ожидающих проверки.</p>
             ) : (
               <ul>
                 {pendingSubmissions.map(s => (
@@ -83,17 +83,17 @@ function TeacherDashboard({ selectedCourseId, setSelectedCourseId }) {
             )}
           </div>
 
-          {/* HORARIO */}
+          {/* РАСПИСАНИЕ */}
           <div className="card">
-            <h2>Horario de hoy</h2>
+            <h2>Расписание на сегодня</h2>
 
             {schedule.length === 0 ? (
-              <p>No tienes clases hoy.</p>
+              <p>Сегодня занятий нет.</p>
             ) : (
               <ul>
                 {schedule.map((s, i) => (
                   <li key={i}>
-                    {s.start_time} - {s.end_time}<br />
+                    {s.start_time} – {s.end_time}<br />
                     {s.course} ({s.group_name})
                   </li>
                 ))}
@@ -106,7 +106,7 @@ function TeacherDashboard({ selectedCourseId, setSelectedCourseId }) {
   }
 
   // ==========================
-  // VISTA DE CURSO (RESTAURADA)
+  // ПРОСМОТР КУРСА
   // ==========================
   return (
     <TeacherCourseView

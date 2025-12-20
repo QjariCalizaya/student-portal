@@ -1,7 +1,6 @@
 ﻿import { useState } from "react";
 import { downloadFile } from "../../utils/downloadFile";
 
-
 function TopicCard({ topic, onReload }) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(topic.topic_title);
@@ -21,7 +20,7 @@ function TopicCard({ topic, onReload }) {
   };
 
   // ==========================
-  // ✏️ EDITAR TÍTULO
+  // ✏️ РЕДАКТИРОВАТЬ НАЗВАНИЕ
   // ==========================
   const saveTitle = async () => {
     clearMessages();
@@ -42,11 +41,11 @@ function TopicCard({ topic, onReload }) {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Error al actualizar el título");
+        throw new Error(data.error || "Ошибка при обновлении названия");
       }
 
       setEditing(false);
-      setSuccess("Título actualizado");
+      setSuccess("Название обновлено");
       onReload();
     } catch (e) {
       setError(e.message);
@@ -56,7 +55,7 @@ function TopicCard({ topic, onReload }) {
   };
 
   // ==========================
-  // ➕ SUBIR ARCHIVO
+  // ➕ ЗАГРУЗИТЬ ФАЙЛ
   // ==========================
   const uploadFile = async (file) => {
     if (!file) return;
@@ -81,10 +80,10 @@ function TopicCard({ topic, onReload }) {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Error al subir el archivo");
+        throw new Error(data.error || "Ошибка при загрузке файла");
       }
 
-      setSuccess("Archivo subido correctamente");
+      setSuccess("Файл успешно загружен");
       onReload();
     } catch (e) {
       setError(e.message);
@@ -94,10 +93,10 @@ function TopicCard({ topic, onReload }) {
   };
 
   // ==========================
-  // 🗑️ ELIMINAR ARCHIVO
+  // 🗑️ УДАЛИТЬ ФАЙЛ
   // ==========================
   const deleteResource = async (resourceId) => {
-    if (!confirm("¿Eliminar este archivo?")) return;
+    if (!confirm("Удалить этот файл?")) return;
 
     clearMessages();
 
@@ -114,10 +113,10 @@ function TopicCard({ topic, onReload }) {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Error al eliminar el archivo");
+        throw new Error(data.error || "Ошибка при удалении файла");
       }
 
-      setSuccess("Archivo eliminado");
+      setSuccess("Файл удалён");
       onReload();
     } catch (e) {
       setError(e.message);
@@ -125,10 +124,10 @@ function TopicCard({ topic, onReload }) {
   };
 
   // ==========================
-  // 🗑️ ELIMINAR TEMA
+  // 🗑️ УДАЛИТЬ ТЕМУ
   // ==========================
   const deleteTopic = async () => {
-    if (!confirm("¿Eliminar este tema y todos sus archivos?")) return;
+    if (!confirm("Удалить эту тему и все её файлы?")) return;
 
     clearMessages();
     setDeleting(true);
@@ -146,7 +145,7 @@ function TopicCard({ topic, onReload }) {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Error al eliminar el tema");
+        throw new Error(data.error || "Ошибка при удалении темы");
       }
 
       onReload();
@@ -157,34 +156,31 @@ function TopicCard({ topic, onReload }) {
     }
   };
 
-const downloadFile = async (resourceId, filename) => {
-  const token = localStorage.getItem("token");
+  const downloadFile = async (resourceId, filename) => {
+    const token = localStorage.getItem("token");
 
-  const res = await fetch(
-    `http://localhost:4000/topics/resources/${resourceId}/download`,
-    {
-      headers: { Authorization: `Bearer ${token}` }
-    }
-  );
+    const res = await fetch(
+      `http://localhost:4000/topics/resources/${resourceId}/download`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
 
-  const blob = await res.blob();
-  const url = window.URL.createObjectURL(blob);
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
 
-  window.URL.revokeObjectURL(url);
-};
-
-
-
+    window.URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="card">
       {/* ==========================
-          TÍTULO
+          НАЗВАНИЕ
       ========================== */}
       {editing ? (
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -193,7 +189,7 @@ const downloadFile = async (resourceId, filename) => {
             onChange={(e) => setTitle(e.target.value)}
           />
           <button onClick={saveTitle} disabled={savingTitle}>
-            {savingTitle ? "Guardando..." : "Guardar"}
+            {savingTitle ? "Сохранение..." : "Сохранить"}
           </button>
           <button
             onClick={() => {
@@ -201,7 +197,7 @@ const downloadFile = async (resourceId, filename) => {
               setTitle(topic.topic_title);
             }}
           >
-            Cancelar
+            Отмена
           </button>
         </div>
       ) : (
@@ -209,44 +205,44 @@ const downloadFile = async (resourceId, filename) => {
       )}
 
       {/* ==========================
-          ARCHIVOS
+          ФАЙЛЫ
       ========================== */}
       <div style={{ marginTop: 10 }}>
-        <strong>Archivos</strong>
+        <strong>Файлы</strong>
 
         {topic.resources.length === 0 ? (
-          <p style={{ opacity: 0.8 }}>(Sin archivos)</p>
+          <p style={{ opacity: 0.8 }}>(Файлы отсутствуют)</p>
         ) : (
           <ul>
             {topic.resources.map((r) => (
-            <li key={r.resource_id}>
-            <span
-                onClick={() =>
-                downloadFile(r.resource_id, r.resource_title)
-                }
-                style={{
-                cursor: "pointer",
-                color: "#2563eb",
-                textDecoration: "underline"
-                }}
-            >
-                {r.resource_title}
-            </span>
+              <li key={r.resource_id}>
+                <span
+                  onClick={() =>
+                    downloadFile(r.resource_id, r.resource_title)
+                  }
+                  style={{
+                    cursor: "pointer",
+                    color: "#2563eb",
+                    textDecoration: "underline"
+                  }}
+                >
+                  {r.resource_title}
+                </span>
 
-            <button
-                style={{ marginLeft: 10 }}
-                onClick={() => deleteResource(r.resource_id)}
-            >
-                🗑
-            </button>
-            </li>
+                <button
+                  style={{ marginLeft: 10 }}
+                  onClick={() => deleteResource(r.resource_id)}
+                >
+                  🗑
+                </button>
+              </li>
             ))}
           </ul>
         )}
       </div>
 
       {/* ==========================
-          ACCIONES
+          ДЕЙСТВИЯ
       ========================== */}
       <div
         style={{
@@ -258,7 +254,7 @@ const downloadFile = async (resourceId, filename) => {
         }}
       >
         <button onClick={() => setEditing((v) => !v)}>
-          ✏ Editar título
+          ✏ Редактировать название
         </button>
 
         <label
@@ -267,7 +263,7 @@ const downloadFile = async (resourceId, filename) => {
             opacity: uploading ? 0.6 : 1
           }}
         >
-          ➕ Agregar archivo
+          ➕ Добавить файл
           <input
             type="file"
             hidden
@@ -284,16 +280,16 @@ const downloadFile = async (resourceId, filename) => {
             color: "white"
           }}
         >
-          {deleting ? "Eliminando..." : "🗑 Eliminar tema"}
+          {deleting ? "Удаление..." : "🗑 Удалить тему"}
         </button>
       </div>
 
       {/* ==========================
-          FEEDBACK
+          УВЕДОМЛЕНИЯ
       ========================== */}
       {uploading && (
         <p style={{ color: "#2563eb", marginTop: 8 }}>
-          Subiendo archivo...
+          Загрузка файла...
         </p>
       )}
 

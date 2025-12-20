@@ -1,10 +1,9 @@
 ﻿import { useState } from "react";
-import "../styles/login.css"; // reutilizamos el mismo estilo
+import "../styles/login.css"; // используем тот же стиль
 import { useNavigate } from "react-router-dom";
 
-
 function Register({ onRegisterSuccess }) {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,43 +27,43 @@ function Register({ onRegisterSuccess }) {
       });
 
       if (!res.ok) {
-        setError("No se pudo registrar el usuario");
+        setError("Не удалось зарегистрировать пользователя");
         return;
       }
 
-      // Registro correcto → volver a login
+      // Успешная регистрация → возврат на страницу входа
       navigate("/login");
       onRegisterSuccess();
 
     } catch (err) {
-      setError("Error de conexión con el servidor");
+      setError("Ошибка подключения к серверу");
     }
   };
 
   return (
     <div className="login-container">
-      <h1>Registro</h1>
+      <h1>Регистрация</h1>
 
       <form className="login-form" onSubmit={handleSubmit}>
-        <label>Nombre completo</label>
+        <label>Полное имя</label>
         <input
           type="text"
-          placeholder="Juan Pérez"
+          placeholder="Иван Иванов"
           required
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
-        <label>Correo electrónico</label>
+        <label>Электронная почта</label>
         <input
           type="email"
-          placeholder="usuario@correo.com"
+          placeholder="user@email.com"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        <label>Contraseña</label>
+        <label>Пароль</label>
         <input
           type="password"
           placeholder="••••••••••"
@@ -73,12 +72,12 @@ function Register({ onRegisterSuccess }) {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button type="submit">Registrarse</button>
+        <button type="submit">Зарегистрироваться</button>
 
         <p className="register-link">
-          ¿Ya tienes cuenta?{" "}
+          Уже есть аккаунт?{" "}
           <a href="#" onClick={onRegisterSuccess}>
-            Inicia sesión
+            Войти
           </a>
         </p>
 

@@ -37,7 +37,7 @@ function TeacherCourseView({ courseGroupId, onBack }) {
   const token = localStorage.getItem("token");
 
   // ==========================
-  // Cargar temas
+  // Загрузка тем
   // ==========================
   const reloadTopics = useCallback(() => {
     setLoading(true);
@@ -49,7 +49,7 @@ function TeacherCourseView({ courseGroupId, onBack }) {
       .then(async res => {
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
-          throw new Error(data.error || "Failed to load topics");
+          throw new Error(data.error || "Ошибка при загрузке тем");
         }
         return res.json();
       })
@@ -59,7 +59,7 @@ function TeacherCourseView({ courseGroupId, onBack }) {
   }, [courseGroupId, token]);
 
   // ==========================
-  // Cargar tareas
+  // Загрузка заданий
   // ==========================
   const loadAssignments = useCallback(() => {
     fetch(`http://localhost:4000/assignments/course/${courseGroupId}`, {
@@ -71,7 +71,7 @@ function TeacherCourseView({ courseGroupId, onBack }) {
   }, [courseGroupId, token]);
 
   // ==========================
-  // Inicial
+  // Инициализация
   // ==========================
   useEffect(() => {
     reloadTopics();
@@ -80,22 +80,22 @@ function TeacherCourseView({ courseGroupId, onBack }) {
 
   return (
     <>
-      <button onClick={onBack}>← Volver</button>
+      <button onClick={onBack}>← Назад</button>
 
       {/* ==========================
-          TAREAS
+          ЗАДАНИЯ
       ========================== */}
-      <h1>Tareas del curso</h1>
+      <h1>Задания курса</h1>
 
       {assignments.length === 0 ? (
-        <p>No hay tareas creadas.</p>
+        <p>Задания не созданы.</p>
       ) : (
         <ul>
           {assignments.map(a => (
             <li key={a.id}>
               <strong>{a.title}</strong>{" "}
               <span style={{ opacity: 0.7 }}>
-                (vence el {new Date(a.due_at).toLocaleDateString()})
+                (срок до {new Date(a.due_at).toLocaleDateString()})
               </span>
             </li>
           ))}
@@ -110,15 +110,15 @@ function TeacherCourseView({ courseGroupId, onBack }) {
       <hr style={{ margin: "30px 0" }} />
 
       {/* ==========================
-          TEMAS
+          ТЕМЫ
       ========================== */}
-      <h1>Temas del curso</h1>
+      <h1>Темы курса</h1>
 
-      {loading && <p>Cargando temas...</p>}
+      {loading && <p>Загрузка тем...</p>}
       {error && <p style={{ color: "#dc2626" }}>{error}</p>}
 
       {!loading && !error && topics.length === 0 && (
-        <p>No hay temas creados.</p>
+        <p>Темы не созданы.</p>
       )}
 
       {topics.map(topic => (

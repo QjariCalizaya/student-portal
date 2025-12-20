@@ -32,7 +32,7 @@ function AssignmentSubmitForm({ assignmentId, onSuccess }) {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Error al subir la tarea");
+        throw new Error(data.error || "Ошибка при загрузке задания");
       }
 
       setFile(null);
@@ -53,7 +53,7 @@ function AssignmentSubmitForm({ assignmentId, onSuccess }) {
       />
 
       <button type="submit" disabled={loading}>
-        {loading ? "Subiendo..." : "Subir tarea"}
+        {loading ? "Загрузка..." : "Отправить задание"}
       </button>
 
       {error && <p className="error-message">{error}</p>}

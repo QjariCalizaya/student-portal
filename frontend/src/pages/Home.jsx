@@ -1,12 +1,12 @@
 ﻿function Home() {
   return (
     <main className="content">
-      <h1>Portal Estudiantil</h1>
+      <h1>Студенческий портал</h1>
       <p>
-        Bienvenido al sistema de gestión académica.
+        Добро пожаловать в систему управления учебным процессом.
       </p>
       <p>
-        Inicia sesión para acceder a tus cursos, horarios y tareas.
+        Войдите в систему, чтобы получить доступ к курсам, расписанию и заданиям.
       </p>
     </main>
   );

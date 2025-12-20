@@ -3,7 +3,8 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate
+  Navigate,
+  useNavigate
 } from "react-router-dom";
 
 import Header from "./components/Header";
@@ -18,6 +19,8 @@ import TeacherDashboard from "./components/teacher/TeacherDashboard";
 import MockScheduleCalendar from "./components/schedule/MockScheduleCalendar";
 
 function App() {
+  const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,7 +29,6 @@ function App() {
 
   const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [selectedView, setSelectedView] = useState("dashboard");
-  // dashboard | course | schedule
 
   // =========================
   // Cargar usuario
@@ -34,6 +36,7 @@ function App() {
   const loadUser = () => {
     const token = localStorage.getItem("token");
     if (!token) {
+      setUser(null);
       setLoading(false);
       return;
     }
@@ -43,10 +46,19 @@ function App() {
     })
       .then(res => (res.ok ? res.json() : null))
       .then(data => {
-        setUser(data);
+        if (!data) {
+          localStorage.removeItem("token");
+          setUser(null);
+        } else {
+          setUser(data);
+        }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        localStorage.removeItem("token");
+        setUser(null);
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -54,90 +66,87 @@ function App() {
   }, []);
 
   // =========================
-  // Cursos estudiante
+  // Cargar cursos
   // =========================
   useEffect(() => {
-    if (!user || user.role !== "STUDENT") {
-      setStudentCourses([]);
-      return;
-    }
+    if (!user) return;
 
-    fetch("http://localhost:4000/courses/my", {
+    const url =
+      user.role === "STUDENT"
+        ? "http://localhost:4000/courses/my"
+        : "http://localhost:4000/courses/teacher";
+
+    fetch(url, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     })
       .then(res => res.json())
-      .then(setStudentCourses)
-      .catch(() => setStudentCourses([]));
+      .then(user.role === "STUDENT" ? setStudentCourses : setTeacherCourses)
+      .catch(() => {
+        setStudentCourses([]);
+        setTeacherCourses([]);
+      });
   }, [user]);
 
   // =========================
-  // Cursos profesor
+  // Logout con redirección
   // =========================
-  useEffect(() => {
-    if (!user || user.role !== "TEACHER") {
-      setTeacherCourses([]);
-      return;
-    }
-
-    fetch("http://localhost:4000/courses/teacher", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-    })
-      .then(res => res.json())
-      .then(setTeacherCourses)
-      .catch(() => setTeacherCourses([]));
-  }, [user]);
-
   const logout = () => {
     localStorage.removeItem("token");
     setUser(null);
+    setSelectedCourseId(null);
+    setSelectedView("dashboard");
+
+    navigate("/login");
   };
 
+  // =========================
+  // Loading
+  // =========================
   if (loading) {
     return <p style={{ padding: 20 }}>Cargando...</p>;
   }
 
+  // =========================
+  // SIN USUARIO
+if (!user) {
   return (
-    <Router>
+    <Routes>
+      {/* REDIRECCIÓN AUTOMÁTICA */}
+      <Route path="/" element={<Navigate to="/login" />} />
+
+      <Route path="/login" element={<Login onLoginSuccess={loadUser} />} />
+      <Route path="/register" element={<Register />} />
+
+      {/* CUALQUIER OTRA RUTA */}
+      <Route path="*" element={<Navigate to="/login" />} />
+    </Routes>
+  );
+}
+
+
+  // =========================
+  // CON USUARIO
+  // =========================
+  return (
+    <>
       <Header user={user} onLogout={logout} />
 
       <div className="layout">
-        {user && (
-          <Sidebar
-            role={user.role}
-            courses={user.role === "STUDENT" ? studentCourses : teacherCourses}
-            onSelectCourse={(id) => {
-              setSelectedCourseId(id);
-              setSelectedView(id ? "course" : "dashboard");
-            }}
-            onSelectSchedule={() => {
-              setSelectedCourseId(null);
-              setSelectedView("schedule");
-            }}
-          />
-        )}
+        <Sidebar
+          role={user.role}
+          courses={user.role === "STUDENT" ? studentCourses : teacherCourses}
+          onSelectCourse={(id) => {
+            setSelectedCourseId(id);
+            setSelectedView(id ? "course" : "dashboard");
+          }}
+          onSelectSchedule={() => {
+            setSelectedCourseId(null);
+            setSelectedView("schedule");
+          }}
+        />
 
         <main className="content">
           <Routes>
-
-            {/* HOME */}
-            <Route
-              path="/"
-              element={!user ? <Home /> : <Navigate to="/dashboard" />}
-            />
-
-            {/* LOGIN */}
-            <Route
-              path="/login"
-              element={!user ? <Login onLoginSuccess={loadUser} /> : <Navigate to="/dashboard" />}
-            />
-
-            {/* REGISTER */}
-            <Route
-              path="/register"
-              element={!user ? <Register /> : <Navigate to="/dashboard" />}
-            />
-
-            {/* DASHBOARD */}
             <Route
               path="/dashboard"
               element={
@@ -147,31 +156,33 @@ function App() {
                   ) : user.role === "STUDENT" ? (
                     <StudentDashboard
                       selectedCourseId={selectedCourseId}
-                      setSelectedCourseId={(id) => {
-                        setSelectedCourseId(id);
-                        setSelectedView(id ? "course" : "dashboard");
-                      }}
+                      setSelectedCourseId={setSelectedCourseId}
                     />
                   ) : (
                     <TeacherDashboard
                       selectedCourseId={selectedCourseId}
-                      setSelectedCourseId={(id) => {
-                        setSelectedCourseId(id);
-                        setSelectedView(id ? "course" : "dashboard");
-                      }}
+                      setSelectedCourseId={setSelectedCourseId}
                     />
                   )}
                 </ProtectedRoute>
               }
             />
 
-            {/* FALLBACK */}
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>
         </main>
       </div>
-    </Router>
+    </>
   );
 }
 
-export default App;
+/**
+ * Router único en toda la app
+ */
+export default function AppWithRouter() {
+  return (
+    <Router>
+      <App />
+    </Router>
+  );
+}

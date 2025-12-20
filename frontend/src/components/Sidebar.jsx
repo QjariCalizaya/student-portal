@@ -17,17 +17,17 @@ function Sidebar({
             onSelectCourse(null);
           }}
         >
-          Dashboard
+          Панель управления
         </li>
 
-        {/* CURSOS */}
+        {/* КУРСЫ */}
         <li onClick={() => setOpenCourses(!openCourses)}>
-          Cursos {openCourses ? "▲" : "▼"}
+          Курсы {openCourses ? "▲" : "▼"}
         </li>
 
         {openCourses && courses.length === 0 && (
           <li style={{ paddingLeft: "30px", opacity: 0.7 }}>
-            (Sin cursos)
+            (Курсы отсутствуют)
           </li>
         )}
 
@@ -45,7 +45,7 @@ function Sidebar({
             </li>
           ))}
 
-        {/* OPCIONES EXTRA */}
+        {/* ДОПОЛНИТЕЛЬНЫЕ ОПЦИИ */}
         {role === "STUDENT" && (
           <>
             <li
@@ -54,11 +54,11 @@ function Sidebar({
                 onSelectSchedule();
               }}
             >
-              Horario
+              Расписание
             </li>
-            <li>Tareas</li>
-            <li>Calificaciones</li>
-            <li>Biblioteca</li>
+            <li>Задания</li>
+            <li>Оценки</li>
+            <li>Библиотека</li>
           </>
         )}
 
@@ -70,9 +70,9 @@ function Sidebar({
                 onSelectSchedule();
               }}
             >
-              Horario
+              Расписание
             </li>
-            <li>Entregas</li>
+            <li>Работы</li>
           </>
         )}
       </ul>

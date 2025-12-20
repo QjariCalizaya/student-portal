@@ -5,10 +5,17 @@ function Header({ user, onLogout }) {
 
   return (
     <header className="header">
-      <div className="logo">🎓 Student Portal</div>
+      <div className="logo">
+        <img
+          src="/logo.svg"
+          alt="Студенческий портал"
+          className="logo-img"
+        />
+
+      </div>
 
       <div className="system-name">
-        Sistema de Gestión Académica
+        Система управления учебным процессом
       </div>
 
       <div className="user-info">
@@ -18,13 +25,13 @@ function Header({ user, onLogout }) {
               className="login-btn"
               onClick={() => navigate("/login")}
             >
-              Iniciar sesión
+              Войти
             </button>
             <button
               className="register-btn"
               onClick={() => navigate("/register")}
             >
-              Registrarse
+              Регистрация
             </button>
           </>
         )}
@@ -39,7 +46,7 @@ function Header({ user, onLogout }) {
                 navigate("/");
               }}
             >
-              Cerrar sesión
+              Выйти
             </button>
           </>
         )}
