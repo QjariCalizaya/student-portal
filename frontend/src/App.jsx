@@ -15,16 +15,22 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import StudentDashboard from "./components/cards/StudentDashboard";
 import TeacherDashboard from "./components/teacher/TeacherDashboard";
+import MockScheduleCalendar from "./components/schedule/MockScheduleCalendar";
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const [studentCourses, setStudentCourses] = useState([]);
-const [selectedCourseId, setSelectedCourseId] = useState(null);
-const [teacherCourses, setTeacherCourses] = useState([]);
+  const [teacherCourses, setTeacherCourses] = useState([]);
 
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
+  const [selectedView, setSelectedView] = useState("dashboard");
+  // dashboard | course | schedule
 
-
+  // =========================
+  // Cargar usuario
+  // =========================
   const loadUser = () => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -33,11 +39,9 @@ const [teacherCourses, setTeacherCourses] = useState([]);
     }
 
     fetch("http://localhost:4000/users/me", {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+      headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => res.ok ? res.json() : null)
+      .then(res => (res.ok ? res.json() : null))
       .then(data => {
         setUser(data);
         setLoading(false);
@@ -45,50 +49,43 @@ const [teacherCourses, setTeacherCourses] = useState([]);
       .catch(() => setLoading(false));
   };
 
-// 1️⃣ Cargar usuario
-useEffect(() => {
-  loadUser();
-}, []);
+  useEffect(() => {
+    loadUser();
+  }, []);
 
+  // =========================
+  // Cursos estudiante
+  // =========================
+  useEffect(() => {
+    if (!user || user.role !== "STUDENT") {
+      setStudentCourses([]);
+      return;
+    }
 
-// 2️⃣ Cargar cursos del ESTUDIANTE
-useEffect(() => {
-  if (!user || user.role !== "STUDENT") {
-    setStudentCourses([]);
-    return;
-  }
+    fetch("http://localhost:4000/courses/my", {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    })
+      .then(res => res.json())
+      .then(setStudentCourses)
+      .catch(() => setStudentCourses([]));
+  }, [user]);
 
-  const token = localStorage.getItem("token");
+  // =========================
+  // Cursos profesor
+  // =========================
+  useEffect(() => {
+    if (!user || user.role !== "TEACHER") {
+      setTeacherCourses([]);
+      return;
+    }
 
-  fetch("http://localhost:4000/courses/my", {
-    headers: { Authorization: `Bearer ${token}` }
-  })
-    .then(res => res.json())
-    .then(setStudentCourses)
-    .catch(() => setStudentCourses([]));
-}, [user]);
-
-
-// 3️⃣ Cargar cursos del PROFESOR
-useEffect(() => {
-  if (!user || user.role !== "TEACHER") {
-    setTeacherCourses([]);
-    return;
-  }
-
-  const token = localStorage.getItem("token");
-
-  fetch("http://localhost:4000/courses/teacher", {
-    headers: { Authorization: `Bearer ${token}` }
-  })
-    .then(res => res.json())
-    .then(setTeacherCourses)
-    .catch(() => setTeacherCourses([]));
-    console.log("Teacher courses:", teacherCourses);
-
-}, [user]);
-
-
+    fetch("http://localhost:4000/courses/teacher", {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    })
+      .then(res => res.json())
+      .then(setTeacherCourses)
+      .catch(() => setTeacherCourses([]));
+  }, [user]);
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -101,30 +98,28 @@ useEffect(() => {
 
   return (
     <Router>
-      <Header
-        user={user}
-        onLogout={logout}
-      />
+      <Header user={user} onLogout={logout} />
 
       <div className="layout">
-    {user && (
-      <Sidebar
-        role={user.role}
-        courses={
-          user.role === "STUDENT"
-            ? studentCourses
-            : teacherCourses
-        }
-        onSelectCourse={setSelectedCourseId}
-      />
-    )}
-
-
+        {user && (
+          <Sidebar
+            role={user.role}
+            courses={user.role === "STUDENT" ? studentCourses : teacherCourses}
+            onSelectCourse={(id) => {
+              setSelectedCourseId(id);
+              setSelectedView(id ? "course" : "dashboard");
+            }}
+            onSelectSchedule={() => {
+              setSelectedCourseId(null);
+              setSelectedView("schedule");
+            }}
+          />
+        )}
 
         <main className="content">
           <Routes>
 
-            {/* HOME PUBLICO */}
+            {/* HOME */}
             <Route
               path="/"
               element={!user ? <Home /> : <Navigate to="/dashboard" />}
@@ -133,45 +128,45 @@ useEffect(() => {
             {/* LOGIN */}
             <Route
               path="/login"
-              element={!user
-                ? <Login onLoginSuccess={loadUser} />
-                : <Navigate to="/dashboard" />
-              }
+              element={!user ? <Login onLoginSuccess={loadUser} /> : <Navigate to="/dashboard" />}
             />
 
             {/* REGISTER */}
             <Route
               path="/register"
-              element={!user
-                ? <Register />
-                : <Navigate to="/dashboard" />
-              }
+              element={!user ? <Register /> : <Navigate to="/dashboard" />}
             />
 
-            {/* DASHBOARD PROTEGIDO */}
+            {/* DASHBOARD */}
             <Route
               path="/dashboard"
               element={
                 <ProtectedRoute user={user}>
-                  {user?.role === "STUDENT" ? (
+                  {selectedView === "schedule" ? (
+                    <MockScheduleCalendar />
+                  ) : user.role === "STUDENT" ? (
                     <StudentDashboard
                       selectedCourseId={selectedCourseId}
-                      setSelectedCourseId={setSelectedCourseId}
+                      setSelectedCourseId={(id) => {
+                        setSelectedCourseId(id);
+                        setSelectedView(id ? "course" : "dashboard");
+                      }}
                     />
                   ) : (
                     <TeacherDashboard
-    selectedCourseId={selectedCourseId}
-    setSelectedCourseId={setSelectedCourseId}
-  />
+                      selectedCourseId={selectedCourseId}
+                      setSelectedCourseId={(id) => {
+                        setSelectedCourseId(id);
+                        setSelectedView(id ? "course" : "dashboard");
+                      }}
+                    />
                   )}
                 </ProtectedRoute>
               }
             />
 
-
             {/* FALLBACK */}
             <Route path="*" element={<Navigate to="/" />} />
-
           </Routes>
         </main>
       </div>

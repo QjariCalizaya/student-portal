@@ -12,6 +12,7 @@ import {
   reviewSubmission
 } from "../controllers/assignmentsController.js";
 
+import { createAssignment } from "../controllers/assignmentsController.js";
 
 
 const router = express.Router();
@@ -19,7 +20,7 @@ const router = express.Router();
 router.get(
   "/course/:courseGroupId",
   authenticate,
-  authorize("STUDENT"),
+  authorize(["STUDENT", "TEACHER"]),
   getAssignmentsByCourseGroup
 );
 
@@ -44,6 +45,14 @@ router.post(
   authorize("TEACHER"),
   reviewSubmission
 );
+
+router.post(
+  "/",
+  authenticate,
+  authorize("TEACHER"),
+  createAssignment
+);
+
 
 export default router;
 

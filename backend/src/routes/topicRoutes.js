@@ -8,6 +8,7 @@ import {
   uploadMaterial
 } from "../controllers/topicsController.js";
 import { deleteResource, deleteTopic } from "../controllers/topicsController.js";
+import { downloadResource } from "../controllers/topicsController.js";
 
 
 const router = express.Router();
@@ -34,6 +35,14 @@ router.delete(
   authorize("TEACHER"),
   deleteTopic
 );
+
+router.get(
+  "/resources/:resourceId/download",
+  authenticate,
+  authorize(["STUDENT", "TEACHER"]),
+  downloadResource
+);
+
 
 
 export default router;

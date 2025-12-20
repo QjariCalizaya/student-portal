@@ -1,4 +1,6 @@
 ﻿import { useState } from "react";
+import { downloadFile } from "../../utils/downloadFile";
+
 
 function TopicCard({ topic, onReload }) {
   const [editing, setEditing] = useState(false);
@@ -155,6 +157,30 @@ function TopicCard({ topic, onReload }) {
     }
   };
 
+const downloadFile = async (resourceId, filename) => {
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(
+    `http://localhost:4000/topics/resources/${resourceId}/download`,
+    {
+      headers: { Authorization: `Bearer ${token}` }
+    }
+  );
+
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+
+  window.URL.revokeObjectURL(url);
+};
+
+
+
+
   return (
     <div className="card">
       {/* ==========================
@@ -193,18 +219,27 @@ function TopicCard({ topic, onReload }) {
         ) : (
           <ul>
             {topic.resources.map((r) => (
-              <li key={r.resource_id}>
-                <a href={r.file_url} download>
-                  {r.resource_title}
-                </a>
+            <li key={r.resource_id}>
+            <span
+                onClick={() =>
+                downloadFile(r.resource_id, r.resource_title)
+                }
+                style={{
+                cursor: "pointer",
+                color: "#2563eb",
+                textDecoration: "underline"
+                }}
+            >
+                {r.resource_title}
+            </span>
 
-                <button
-                  style={{ marginLeft: 10 }}
-                  onClick={() => deleteResource(r.resource_id)}
-                >
-                  🗑
-                </button>
-              </li>
+            <button
+                style={{ marginLeft: 10 }}
+                onClick={() => deleteResource(r.resource_id)}
+            >
+                🗑
+            </button>
+            </li>
             ))}
           </ul>
         )}

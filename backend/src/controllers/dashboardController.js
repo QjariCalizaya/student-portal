@@ -108,3 +108,83 @@ export const getTodaySchedule = async (req, res) => {
 };
 
 
+export const getTeacherTodaySchedule = async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+
+    const result = await pool.query(
+      `
+      SELECT
+        s.start_time,
+        s.end_time,
+        c.title AS course,
+        cg.name AS group_name
+      FROM schedule_items s
+      JOIN course_groups cg ON s.course_group_id = cg.id
+      JOIN courses c ON cg.course_id = c.id
+      WHERE cg.teacher_id = $1
+        AND s.weekday = EXTRACT(ISODOW FROM CURRENT_DATE)
+      ORDER BY s.start_time
+      `,
+      [teacherId]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Teacher schedule error:", err);
+    res.status(500).json({ error: "Failed to load teacher schedule" });
+  }
+};
+
+export const getWeeklySchedule = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const role = req.user.role;
+
+    let result;
+
+    if (role === "STUDENT") {
+      result = await pool.query(
+        `
+        SELECT
+          s.weekday,
+          s.start_time,
+          s.end_time,
+          c.title AS course,
+          cg.name AS group_name
+        FROM schedule_items s
+        JOIN course_groups cg ON s.course_group_id = cg.id
+        JOIN courses c ON cg.course_id = c.id
+        JOIN enrollments e ON e.course_group_id = cg.id
+        WHERE e.student_id = $1
+        ORDER BY s.weekday, s.start_time
+        `,
+        [userId]
+      );
+    } else if (role === "TEACHER") {
+      result = await pool.query(
+        `
+        SELECT
+          s.weekday,
+          s.start_time,
+          s.end_time,
+          c.title AS course,
+          cg.name AS group_name
+        FROM schedule_items s
+        JOIN course_groups cg ON s.course_group_id = cg.id
+        JOIN courses c ON cg.course_id = c.id
+        WHERE cg.teacher_id = $1
+        ORDER BY s.weekday, s.start_time
+        `,
+        [userId]
+      );
+    } else {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Weekly schedule error:", err);
+    res.status(500).json({ error: "Failed to load schedule" });
+  }
+};

@@ -149,3 +149,49 @@ export const reviewSubmission = async (req, res) => {
     res.status(500).json({ error: "Failed to review submission" });
   }
 };
+
+export const createAssignment = async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+    const { course_group_id, title, due_at } = req.body;
+
+    // Verificar que el profesor dicta este curso
+    const check = await pool.query(
+      `
+      SELECT 1
+      FROM course_groups
+      WHERE id = $1 AND teacher_id = $2
+      `,
+      [course_group_id, teacherId]
+    );
+
+    if (check.rowCount === 0) {
+      return res.status(403).json({ error: "Not allowed" });
+    }
+
+const result = await pool.query(
+  `
+  INSERT INTO assignments (
+    course_group_id,
+    title,
+    due_at,
+    created_by
+  )
+  VALUES ($1, $2, $3, $4)
+  RETURNING *
+  `,
+  [
+    course_group_id,
+    title,
+    due_at,
+    teacherId // 👈 AQUÍ ESTABA EL BUG
+  ]
+);
+
+
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error("Create assignment error:", err);
+    res.status(500).json({ error: "Failed to create assignment" });
+  }
+};

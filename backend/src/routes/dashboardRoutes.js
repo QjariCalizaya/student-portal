@@ -6,6 +6,9 @@ import {
   getTodaySchedule,
   getCourseAverage
 } from "../controllers/dashboardController.js";
+import { authorize } from "../middlewares/roleMiddleware.js";
+import { getTeacherTodaySchedule } from "../controllers/dashboardController.js";
+import { getWeeklySchedule } from "../controllers/dashboardController.js";
 
 const router = express.Router();
 
@@ -16,6 +19,18 @@ router.get(
   "/courses/:courseGroupId/average",
   authenticate,
   getCourseAverage
+);
+router.get(
+  "/teacher/schedule/today",
+  authenticate,
+  authorize("TEACHER"),
+  getTeacherTodaySchedule
+);
+
+router.get(
+  "/schedule/week",
+  authenticate,
+  getWeeklySchedule
 );
 
 

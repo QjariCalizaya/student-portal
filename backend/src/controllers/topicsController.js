@@ -72,7 +72,7 @@ export const updateTopicTitle = async (req, res) => {
 
 
 import multer from "multer";
-import path from "path";
+
 
 const storage = multer.diskStorage({
   destination: "uploads/materials",
@@ -195,5 +195,75 @@ export const deleteTopic = async (req, res) => {
   } catch (err) {
     console.error("Delete topic error:", err);
     res.status(500).json({ error: "Failed to delete topic" });
+  }
+};
+
+
+
+export const downloadResource = async (req, res) => {
+  const { resourceId } = req.params;
+  const userId = req.user.id;
+  const role = req.user.role;
+
+  try {
+    let result;
+
+    // ======================
+    // TEACHER
+    // ======================
+    if (role === "TEACHER") {
+      result = await pool.query(
+        `
+        SELECT tr.file_url
+        FROM topic_resources tr
+        JOIN course_topics ct ON ct.id = tr.topic_id
+        JOIN course_groups cg ON cg.id = ct.course_group_id
+        WHERE tr.id = $1
+          AND cg.teacher_id = $2
+        `,
+        [resourceId, userId]
+      );
+    }
+
+    // ======================
+    // STUDENT
+    // ======================
+    else if (role === "STUDENT") {
+      result = await pool.query(
+        `
+        SELECT tr.file_url
+        FROM topic_resources tr
+        JOIN course_topics ct ON ct.id = tr.topic_id
+        JOIN enrollments e ON e.course_group_id = ct.course_group_id
+        WHERE tr.id = $1
+          AND e.student_id = $2
+        `,
+        [resourceId, userId]
+      );
+    } else {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    if (!result || result.rowCount === 0) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const fileUrl = result.rows[0].file_url;
+    const filename = path.basename(fileUrl);
+    const filePath = path.join(MATERIALS_DIR, filename);
+
+    // ✅ VALIDAR EXISTENCIA (forma correcta con fs/promises)
+    try {
+      await fs.access(filePath);
+    } catch {
+      console.error("File not found on disk:", filePath);
+      return res.status(404).json({ error: "File not found on server" });
+    }
+
+    // ✅ DESCARGA
+    res.download(filePath);
+  } catch (err) {
+    console.error("DOWNLOAD RESOURCE ERROR:", err);
+    res.status(500).json({ error: "Failed to download file" });
   }
 };

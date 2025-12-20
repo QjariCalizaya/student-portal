@@ -32,7 +32,7 @@ app.use("/courses", courseRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/assignments", assignmentRoutes);
 app.use("/topics", topicRoutes);
-app.use("/uploads", express.static("uploads"));
+//app.use("/uploads", express.static("uploads"));
 
 
 

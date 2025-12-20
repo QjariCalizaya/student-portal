@@ -1,13 +1,22 @@
 ﻿import { useState } from "react";
 
-function Sidebar({ role, courses = [], onSelectCourse }) {
+function Sidebar({
+  role,
+  courses = [],
+  onSelectCourse,
+  onSelectSchedule
+}) {
   const [openCourses, setOpenCourses] = useState(false);
 
   return (
     <nav className="sidebar">
       <ul>
         {/* DASHBOARD */}
-        <li onClick={() => onSelectCourse(null)}>
+        <li
+          onClick={() => {
+            onSelectCourse(null);
+          }}
+        >
           Dashboard
         </li>
 
@@ -28,22 +37,25 @@ function Sidebar({ role, courses = [], onSelectCourse }) {
               key={course.course_group_id ?? course.id}
               style={{ paddingLeft: "30px" }}
               onClick={() =>
-                onSelectCourse(
-                  course.course_group_id ?? course.id
-                )
+                onSelectCourse(course.course_group_id ?? course.id)
               }
             >
               {course.title}
-              {course.group_name
-                ? ` – ${course.group_name}`
-                : ""}
+              {course.group_name ? ` – ${course.group_name}` : ""}
             </li>
           ))}
 
         {/* OPCIONES EXTRA */}
         {role === "STUDENT" && (
           <>
-            <li>Horario</li>
+            <li
+              onClick={() => {
+                onSelectCourse(null);
+                onSelectSchedule();
+              }}
+            >
+              Horario
+            </li>
             <li>Tareas</li>
             <li>Calificaciones</li>
             <li>Biblioteca</li>
@@ -52,7 +64,14 @@ function Sidebar({ role, courses = [], onSelectCourse }) {
 
         {role === "TEACHER" && (
           <>
-            <li>Horario</li>
+            <li
+              onClick={() => {
+                onSelectCourse(null);
+                onSelectSchedule();
+              }}
+            >
+              Horario
+            </li>
             <li>Entregas</li>
           </>
         )}
